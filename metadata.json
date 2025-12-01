@@ -1,0 +1,5 @@
+{
+  "name": "Lead Management System",
+  "description": "A web application for managing sales leads, with data synchronized from a backend data source. Features role-based access for reps and admins, detailed lead views, note-taking, and CSV export for admins.",
+  "requestFramePermissions": []
+}
