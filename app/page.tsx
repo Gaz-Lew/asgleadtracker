@@ -1,13 +1,19 @@
+'use client';
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { Lead, OfflineAction } from './types';
-import AuthScreen from './components/AuthScreen';
-import LeadList from './components/LeadList';
-import LeadDetail from './components/LeadDetail';
-import { DownloadIcon, LogOutIcon, LoaderIcon, ClockIcon, WifiOffIcon } from './components/icons';
-import { formatDistanceToNow } from './utils';
+import { Lead, OfflineAction } from '../types';
+import AuthScreen from '../components/AuthScreen';
+import LeadList from '../components/LeadList';
+import LeadDetail from '../components/LeadDetail';
+import { DownloadIcon, LogOutIcon, LoaderIcon, ClockIcon, WifiOffIcon } from '../components/icons';
+import { formatDistanceToNow } from '../lib/utils';
 
 // --- Local Storage Helper Functions ---
 const getFromStorage = <T,>(key: string, defaultValue: T): T => {
+  // Client-side only check
+  if (typeof window === 'undefined') {
+    return defaultValue;
+  }
   try {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : defaultValue;
@@ -17,6 +23,10 @@ const getFromStorage = <T,>(key: string, defaultValue: T): T => {
   }
 };
 const setInStorage = (key: string, value: any) => {
+  // Client-side only check
+  if (typeof window === 'undefined') {
+    return;
+  }
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
@@ -230,8 +240,13 @@ export default function Home() {
   
   const now = new Date();
   const upcomingReminders = leads
-      .filter(l => l.ReminderDateTime)
+      .filter(l => l.ReminderDateTime && new Date(l.ReminderDateTime) > now)
       .sort((a, b) => new Date(a.ReminderDateTime!).getTime() - new Date(b.ReminderDateTime!).getTime());
+  
+  const overdueReminders = leads
+      .filter(l => l.ReminderDateTime && new Date(l.ReminderDateTime) <= now)
+      .sort((a, b) => new Date(a.ReminderDateTime!).getTime() - new Date(b.ReminderDateTime!).getTime());
+
 
   return (
     <div className="flex flex-col h-screen bg-white font-sans">
@@ -278,23 +293,28 @@ export default function Home() {
               ${selectedLead ? 'hidden md:flex' : 'flex'} 
               w-full md:w-1/3 lg:w-1/4 flex-col h-full
             `}>
-              {upcomingReminders.length > 0 && (
+              {(upcomingReminders.length > 0 || overdueReminders.length > 0) && (
                 <div className="p-3 bg-amber-50 border-b border-amber-200">
                     <h3 className="font-semibold text-amber-800 flex items-center gap-2"><ClockIcon size={16}/> Reminders</h3>
                     <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-                        {upcomingReminders.map(lead => {
-                            const reminderDate = new Date(lead.ReminderDateTime!);
-                            const isOverdue = reminderDate < now;
-                            return (
-                                <div key={lead.LeadID} onClick={() => setSelectedLead(lead)} className="p-2 rounded-md bg-white cursor-pointer hover:bg-gray-100 border border-gray-200 shadow-sm">
-                                    <p className="font-bold text-sm truncate text-gray-800">{lead.LeadName}</p>
-                                    <p className={`text-xs truncate ${isOverdue ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
-                                      {formatDistanceToNow(lead.ReminderDateTime!)}
-                                    </p>
-                                    {lead.ReminderNote && <p className="text-xs text-gray-500 truncate mt-1">"{lead.ReminderNote}"</p>}
-                                </div>
-                            )
-                        })}
+                        {overdueReminders.map(lead => (
+                            <div key={lead.LeadID} onClick={() => setSelectedLead(lead)} className="p-2 rounded-md bg-red-100 border border-red-200 cursor-pointer hover:bg-red-200 shadow-sm">
+                                <p className="font-bold text-sm truncate text-red-900">{lead.LeadName}</p>
+                                <p className="text-xs truncate text-red-700 font-medium">
+                                  {formatDistanceToNow(lead.ReminderDateTime!)}
+                                </p>
+                                {lead.ReminderNote && <p className="text-xs text-gray-600 truncate mt-1">"{lead.ReminderNote}"</p>}
+                            </div>
+                        ))}
+                        {upcomingReminders.map(lead => (
+                            <div key={lead.LeadID} onClick={() => setSelectedLead(lead)} className="p-2 rounded-md bg-white cursor-pointer hover:bg-gray-100 border border-gray-200 shadow-sm">
+                                <p className="font-bold text-sm truncate text-gray-800">{lead.LeadName}</p>
+                                <p className="text-xs truncate text-gray-600">
+                                  {formatDistanceToNow(lead.ReminderDateTime!)}
+                                </p>
+                                {lead.ReminderNote && <p className="text-xs text-gray-500 truncate mt-1">"{lead.ReminderNote}"</p>}
+                            </div>
+                        ))}
                     </div>
                 </div>
               )}

@@ -1,20 +1,61 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Lead Management App
 
-# Run and deploy your AI Studio app
+A Next.js 14 application for managing sales leads backed by Google Sheets.
 
-This contains everything you need to run your app locally.
+## Features
+- **Two-way Sync**: Updates in the app reflect in Google Sheets immediately.
+- **Offline Mode**: View cached data and queue updates while offline. Changes sync automatically upon reconnection.
+- **Reminders**: Set date/time reminders for leads, visible on the dashboard.
+- **Role Based Access**: Reps (PIN access) and Admins (Email/Password).
+- **Notes System**: Timestamped, append-only notes for every lead.
+- **Admin CSV Export**: Admins can download all lead data as a CSV file.
+- **Responsive**: Mobile-first design works on any device.
 
-View your app in AI Studio: https://ai.studio/apps/drive/126_3IBNW76CKcje7GXhLUOiSvfm7gPDe
+## Setup Instructions
 
-## Run Locally
+### 1. Google Cloud Setup
+1.  Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2.  Create a new Project and enable the **Google Sheets API**.
+3.  Go to "Credentials", create a **Service Account**.
+4.  Create a JSON Key for the Service Account and download it.
+5.  **Important:** Open your Google Sheet and share it (with "Editor" access) with the `client_email` found in your downloaded JSON key file.
 
-**Prerequisites:**  Node.js
+### 2. Google Sheet Schema
+Your Google Sheet must have a sheet (tab) named `LEADS` (or whatever you set in `LEADS_SHEET_NAME`). The first row must contain exactly these headers in this order:
 
+`Date`, `LeadName`, `Address`, `ContactNumber`, `Notes`, `Called`, `RenterOwner`, `Superannuation`, `RepName`, `LeadStatus`, `CallTimestamp`, `CallResult`, `LeadID`, `LastUpdated`
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### 3. Environment Variables
+Create a `.env.local` file in the root of your project:
+
+```bash
+# Google Credentials (from your downloaded JSON key file)
+GOOGLE_SERVICE_ACCOUNT_EMAIL="your-service-account@project.iam.gserviceaccount.com"
+GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+
+# Sheet Config
+LEADS_SPREADSHEET_ID="your_google_sheet_id_from_url"
+LEADS_SHEET_NAME="LEADS" # Optional, defaults to LEADS
+
+# Admin Auth (for the admin login screen)
+ADMIN_EMAIL="admin@example.com"
+ADMIN_PASSWORD_HASH="secret123" # Use a strong, non-guessable password
+```
+
+### 4. Local Development
+Install dependencies and run the development server:
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 5. Vercel Deployment
+
+1.  Push this repository to GitHub/GitLab/Bitbucket.
+2.  Import the project into Vercel.
+3.  In the Vercel Project Settings, add the same Environment Variables from your `.env.local` file.
+    *   **Note:** For `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY`, copy the entire string including `-----BEGIN PRIVATE KEY-----` and the `\n` characters.
+4.  Deploy. Your application will be live.
