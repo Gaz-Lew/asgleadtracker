@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 import { v4 as uuidv4 } from 'uuid';
-import { Lead } from '../types';
+import { Lead } from '@/types';
 import { format } from 'date-fns';
 
 // Environment variable validation

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Lead } from '../types';
-import { formatDistanceToNow } from '../utils';
+import { Lead } from '@/types';
+import { formatDistanceToNow } from '@/lib/utils';
 import { ClockIcon } from './icons';
 
 interface LeadListProps {

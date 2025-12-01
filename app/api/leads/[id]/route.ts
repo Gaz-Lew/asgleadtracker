@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateLeadFields } from '../../../../lib/googleSheets';
+import { updateLeadFields } from '@/lib/googleSheets';
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {

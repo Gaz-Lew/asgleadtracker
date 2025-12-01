@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lead } from '../types';
+import { Lead } from '@/types';
 import { SaveIcon, PhoneIcon, ClockIcon, TrashIcon } from './icons';
 
 interface LeadDetailProps {

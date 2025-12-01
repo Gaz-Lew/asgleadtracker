@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Lead, OfflineAction } from '../types';
-import AuthScreen from '../components/AuthScreen';
-import LeadList from '../components/LeadList';
-import LeadDetail from '../components/LeadDetail';
-import { DownloadIcon, LogOutIcon, LoaderIcon, ClockIcon, WifiOffIcon } from '../components/icons';
-import { formatDistanceToNow } from '../lib/utils';
+import { Lead, OfflineAction } from '@/types';
+import AuthScreen from '@/components/AuthScreen';
+import LeadList from '@/components/LeadList';
+import LeadDetail from '@/components/LeadDetail';
+import { DownloadIcon, LogOutIcon, LoaderIcon, ClockIcon, WifiOffIcon } from '@/components/icons';
+import { formatDistanceToNow } from '@/lib/utils';
 
 // --- Local Storage Helper Functions ---
 const getFromStorage = <T,>(key: string, defaultValue: T): T => {

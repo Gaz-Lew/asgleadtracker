@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { appendLeadNote } from '../../../../../lib/googleSheets';
+import { appendLeadNote } from '@/lib/googleSheets';
 import { format } from 'date-fns';
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
