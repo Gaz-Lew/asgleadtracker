@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { Lead } from '@/types';
 import { SaveIcon, PhoneIcon, ClockIcon, TrashIcon } from './icons';
 
@@ -236,13 +236,17 @@ export default function LeadDetail({ lead, onUpdate, onAddNote, onUpdateReminder
   );
 }
 
-const InputField = ({ label, value, onChange }: { label: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }) => (
-    <div>
-        <label className="text-xs text-gray-500 font-medium">{label}</label>
-        <input 
-            className="w-full border rounded-md p-2 text-gray-900 bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
-            value={value}
-            onChange={onChange}
-        />
-    </div>
-);
+const InputField = ({ label, value, onChange }: { label: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }) => {
+    const id = useId();
+    return (
+        <div>
+            <label htmlFor={id} className="text-xs text-gray-500 font-medium">{label}</label>
+            <input 
+                id={id}
+                className="w-full border rounded-md p-2 text-gray-900 bg-white border-gray-300 focus:ring-2 focus:ring-blue-500"
+                value={value}
+                onChange={onChange}
+            />
+        </div>
+    );
+};

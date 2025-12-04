@@ -151,6 +151,7 @@ export default function Home() {
     if (selectedLead?.LeadID === id) {
       setSelectedLead(prev => (prev ? { ...prev, ...fields } : null));
     }
+    setInStorage('leadAppLeads', updatedLeads); // always update cache for offline persistence
 
     if (isOnline) {
       try {
@@ -160,11 +161,12 @@ export default function Home() {
           body: JSON.stringify({ fields }),
         });
         if (!res.ok) throw new Error('Failed to save update');
-        setInStorage('leadAppLeads', updatedLeads); // Cache successful update
       } catch (err) {
         console.error(err);
-        alert('Failed to save update. Please check your connection.');
-        // Revert handled by next fetch or page reload
+        alert('Failed to save update. Queuing for later.');
+        const queue = getFromStorage<OfflineAction[]>('offlineQueue', []);
+        queue.push({ type: 'UPDATE_LEAD', payload: { id, fields } });
+        setInStorage('offlineQueue', queue);
       }
     } else {
       const queue = getFromStorage<OfflineAction[]>('offlineQueue', []);
@@ -184,6 +186,7 @@ export default function Home() {
     if (selectedLead?.LeadID === id) {
       setSelectedLead(prev => (prev ? { ...prev, Notes: updatedNotes } : null));
     }
+    setInStorage('leadAppLeads', updatedLeads);
 
     if (isOnline) {
       try {
@@ -192,11 +195,13 @@ export default function Home() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ noteText, repName }),
         });
-        setInStorage('leadAppLeads', updatedLeads);
         setTimeout(fetchLeads, 1000); 
       } catch (err) {
         console.error(err);
-        alert('Failed to add note. Please check your connection.');
+        alert('Failed to add note. Queuing for later.');
+        const queue = getFromStorage<OfflineAction[]>('offlineQueue', []);
+        queue.push({ type: 'ADD_NOTE', payload: { id, noteText, repName } });
+        setInStorage('offlineQueue', queue);
       }
     } else {
       const queue = getFromStorage<OfflineAction[]>('offlineQueue', []);
@@ -293,10 +298,10 @@ export default function Home() {
               ${selectedLead ? 'hidden md:flex' : 'flex'} 
               w-full md:w-1/3 lg:w-1/4 flex-col h-full
             `}>
-              {(upcomingReminders.length > 0 || overdueReminders.length > 0) && (
-                <div className="p-3 bg-amber-50 border-b border-amber-200">
-                    <h3 className="font-semibold text-amber-800 flex items-center gap-2"><ClockIcon size={16}/> Reminders</h3>
-                    <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+              {overdueReminders.length > 0 && (
+                <div className="p-3 bg-red-50 border-b border-red-200">
+                    <h3 className="font-semibold text-red-800 flex items-center gap-2"><ClockIcon size={16}/> Overdue ({overdueReminders.length})</h3>
+                    <div className="mt-2 space-y-2 max-h-32 overflow-y-auto">
                         {overdueReminders.map(lead => (
                             <div key={lead.LeadID} onClick={() => setSelectedLead(lead)} className="p-2 rounded-md bg-red-100 border border-red-200 cursor-pointer hover:bg-red-200 shadow-sm">
                                 <p className="font-bold text-sm truncate text-red-900">{lead.LeadName}</p>
@@ -306,6 +311,13 @@ export default function Home() {
                                 {lead.ReminderNote && <p className="text-xs text-gray-600 truncate mt-1">"{lead.ReminderNote}"</p>}
                             </div>
                         ))}
+                    </div>
+                </div>
+              )}
+               {upcomingReminders.length > 0 && (
+                <div className="p-3 bg-amber-50 border-b border-amber-200">
+                    <h3 className="font-semibold text-amber-800 flex items-center gap-2"><ClockIcon size={16}/> Upcoming ({upcomingReminders.length})</h3>
+                    <div className="mt-2 space-y-2 max-h-32 overflow-y-auto">
                         {upcomingReminders.map(lead => (
                             <div key={lead.LeadID} onClick={() => setSelectedLead(lead)} className="p-2 rounded-md bg-white cursor-pointer hover:bg-gray-100 border border-gray-200 shadow-sm">
                                 <p className="font-bold text-sm truncate text-gray-800">{lead.LeadName}</p>
